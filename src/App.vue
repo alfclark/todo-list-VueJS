@@ -17,14 +17,24 @@
     </div>
     <ul class="todo-list">
       <li class="list-item" v-for="(todo, index) in todos" :key="todo.id">
-        <h3 :class="{ done: todo.done }">{{ todo.content }}</h3>
+        <div class="todo">
+          <a
+            class="markDone"
+            :class="{ check: todo.done }"
+            @click="toggleDone(todo)"
+            ><i v-show="todo.done" class="fa-solid fa-check"></i
+          ></a>
+          <h3 :class="{ done: todo.done }">{{ todo.content }}</h3>
+        </div>
         <div class="selectors">
-          <a class="markDone" @click="toggleDone(todo)"
-            ><i class="fa-solid fa-check"></i
-          ></a>
-          <a @click="removeTodo(index)" class="deleteTodo"
-            ><i class="fa-solid fa-trash-can"></i
-          ></a>
+          <Transition>
+            <a
+              v-show="todo.delete"
+              @click="removeTodo(index)"
+              class="deleteTodo"
+              ><i class="fa-solid fa-trash-can"></i
+            ></a>
+          </Transition>
         </div>
       </li>
     </ul>
@@ -42,11 +52,15 @@ export default {
         id: Date.now(),
         done: false,
         content: newTodo.value,
+        delete: false,
       });
       newTodo.value = "";
     }
     function toggleDone(todo) {
       todo.done = !todo.done;
+      setTimeout(() => {
+        todo.delete = !todo.delete;
+      }, 100);
     }
     function removeTodo(index) {
       todos.value.splice(index, 1);
@@ -54,6 +68,7 @@ export default {
     function markAllDone() {
       todos.value.forEach((todo) => (todo.done = true));
     }
+
     return {
       todos,
       newTodo,
@@ -164,36 +179,65 @@ body {
   background-color: white;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
+.todo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 .selectors {
   display: flex;
+  width: 3rem;
+  height: 100%;
 }
 
 .markDone {
-  padding: 1rem;
-  background-color: #62ce9d;
-  height: 100%;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: solid 1px black;
   margin: 0;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: 0.4s;
 }
 .markDone:hover {
   background-color: #ccc;
-  transition: 0.6s;
+}
+.fa-solid {
+  font-size: 1rem;
 }
 .deleteTodo {
-  padding: 1rem;
-  background-color: rgb(201, 107, 90);
+  width: 100%;
   height: 100%;
+  background-color: rgb(201, 107, 90);
   margin: 0;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.4s;
 }
 .deleteTodo:hover {
   background-color: rgb(209, 211, 89);
-  transition: 0.6s;
 }
 .done {
   text-decoration: line-through;
   color: grey;
+}
+.check {
+  background: #62ce9d;
+}
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 
 @media screen and (max-width: 500px) {
